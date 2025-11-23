@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CatのTime</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sky: {
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                        },
+                        cream: {
+                            50: '#fffdf5', // Very light cream
+                            100: '#fef9c3', // Light yellow/beige tint
+                            200: '#fde047',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Noto+Sans+SC:wght@100..900&family=Noto+Sans+KR:wght@100..900&display=swap');
+        body {
+            font-family: 'Inter', 'Noto Sans SC', 'Noto Sans KR', sans-serif;
+            background-color: #fffdf5; /* Cream Background */
+            color: #4b5563;
+        }
+        /* Custom styling - Sky Blue & Cream Palette */
+        .header-bg {
+            background-color: #fffdf5; /* Cream */
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .section-bg {
+            background-color: #ffffff;
+        }
+        .accent-bg-soft {
+            background-color: #e0f2fe; /* Light Sky Blue */
+        }
+        .text-accent {
+            color: #0ea5e9; /* Sky Blue 500 */
+        }
+        .text-accent-dark {
+            color: #0284c7; /* Sky Blue 600 */
+        }
+        .btn-primary {
+            background-color: #38bdf8; /* Sky Blue 400 */
+            color: white;
+            transition: all 0.2s;
+        }
+        .btn-primary:hover {
+            background-color: #0ea5e9; /* Sky Blue 500 */
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
+        }
+        .card-shadow {
+             box-shadow: 0 10px 25px -5px rgba(14, 165, 233, 0.1), 0 8px 10px -6px rgba(14, 165, 233, 0.1);
+             border: 1px solid #f0f9ff;
+        }
+        .section-separator {
+            border-bottom: 4px solid #38bdf8;
+            display: inline-block;
+            padding-bottom: 4px;
+        }
+        
+        /* Gallery specific styles */
+        .gallery-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+        .gallery-item {
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+            cursor: pointer; /* Add pointer cursor */
+        }
+        .gallery-item:hover {
+            transform: scale(1.03);
+            box-shadow: 0 10px 15px rgba(56, 189, 248, 0.2);
+        }
+        .gallery-item img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        /* Language Selector Style */
+        .lang-select {
+            background-color: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+            color: #4b5563;
+            cursor: pointer;
+        }
+        .lang-select:focus {
+            outline: none;
+            border-color: #38bdf8;
+        }
+
+        /* Horizontal Scrolling Carousel */
+        .carousel-container {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            gap: 1rem;
+            padding-bottom: 1rem;
+            -webkit-overflow-scrolling: touch;
+        }
+        .carousel-container::-webkit-scrollbar {
+            height: 8px;
+        }
+        .carousel-container::-webkit-scrollbar-thumb {
+            background: #bae6fd;
+            border-radius: 4px;
+        }
+        .carousel-item {
+            flex: 0 0 85%;
+            scroll-snap-align: center;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: relative;
+            cursor: pointer; /* Add pointer cursor */
+        }
+        @media (min-width: 768px) {
+            .carousel-item {
+                flex: 0 0 45%;
+            }
+        }
+        .carousel-item img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        .carousel-item:hover img {
+            transform: scale(1.05);
+        }
+
+        /* Lightbox Styles */
+        #lightbox {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        #lightbox.active {
+            display: flex;
+            opacity: 1;
+        }
+        #lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        #lightbox.active img {
+            transform: scale(1);
+        }
+        #lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 40px;
+            cursor: pointer;
+            z-index: 101;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Lightbox Modal -->
+    <div id="lightbox" onclick="closeLightbox()">
+        <span id="lightbox-close">&times;</span>
+        <img id="lightbox-img" src="" alt="Enlarged Image">
+    </div>
+
+    <header class="header-bg sticky top-0 z-20 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <div class="flex items-center">
+                <!-- Logo -->
+                <img src="logo.jpg" alt="CatのTime Logo" class="h-14 w-14 mr-3 object-cover rounded-full border-2 border-sky-200 cursor-pointer" onclick="openLightbox(this.src)">
+                <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight">CatのTime</h1>
+            </div>
+            <div class="flex items-center gap-4">
+                <nav class="hidden md:flex space-x-6 text-lg font-medium">
+                    <a href="#home" class="text-gray-600 hover:text-accent transition duration-150" data-i18n="nav_home">Home</a>
+                    <a href="#grooming_section" class="text-gray-600 hover:text-accent transition duration-150" data-i18n="nav_grooming">Grooming</a>
+                    <a href="#boarding_section" class="text-gray-600 hover:text-accent transition duration-150" data-i18n="nav_boarding">Boarding</a>
+                    <a href="#products_section" class="text-gray-600 hover:text-accent transition duration-150" data-i18n="nav_products">Products</a>
+                    <a href="#live_sales_section" class="text-gray-600 hover:text-accent transition duration-150" data-i18n="nav_sales">Cat Sales</a>
+                </nav>
+                
+                <select id="language-selector" class="lang-select" onchange="changeLanguage(this.value)">
+                    <option value="en">🇺🇸 English</option>
+                    <option value="tl">🇵🇭 Tagalog</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="zh">🇨🇳 中文</option>
+                </select>
+
+                <button id="mobile-menu-btn" class="md:hidden text-gray-600 text-3xl ml-2">
+                    &#9776;
+                </button>
+            </div>
+        </div>
+        
+        <div id="mobile-menu" class="hidden md:hidden pb-4 text-center bg-white border-t border-gray-100">
+            <a href="#home" class="block py-3 text-gray-600 hover:bg-sky-50 transition duration-150" data-i18n="nav_home">Home</a>
+            <a href="#grooming_section" class="block py-3 text-gray-600 hover:bg-sky-50 transition duration-150" data-i18n="nav_grooming">Grooming</a>
+            <a href="#boarding_section" class="block py-3 text-gray-600 hover:bg-sky-50 transition duration-150" data-i18n="nav_boarding">Boarding</a>
+            <a href="#products_section" class="block py-3 text-gray-600 hover:bg-sky-50 transition duration-150" data-i18n="nav_products">Products</a>
+            <a href="#live_sales_section" class="block py-3 text-gray-600 hover:bg-sky-50 transition duration-150" data-i18n="nav_sales">Cat Sales</a>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-20">
+        
+        <!-- Home Section -->
+        <section id="home" class="text-center p-8 rounded-3xl accent-bg-soft card-shadow relative overflow-hidden">
+            <div class="md:flex md:items-center md:justify-around text-left relative z-10">
+                <div class="md:w-1/2">
+                    <div class="inline-block px-4 py-1 rounded-full bg-white text-accent-dark text-sm font-bold mb-4 shadow-sm" data-i18n="hero_welcome">
+                        Welcome to our Cat Cafe!
+                    </div>
+                    <h2 class="text-5xl font-black text-gray-800 mb-4 leading-tight">
+                         <span class="text-accent">CatのTime</span><br><span data-i18n="hero_tagline">Where Cats and Hearts Connect</span>
+                    </h2>
+                    
+                    <div class="bg-white p-5 rounded-xl shadow-md border-l-4 border-sky-400 mb-8 transform hover:scale-105 transition duration-300">
+                        <h3 class="text-2xl font-bold text-gray-800 flex items-center">
+                            <i class="fas fa-ticket-alt text-accent mr-3"></i> <span data-i18n="hero_free_entry_title">Free Entry!</span>
+                        </h3>
+                        <p class="text-gray-600 mt-1" data-i18n="hero_free_entry_desc">No Admission Fee Required. Come visit us and play with cats anytime!</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700 mb-8">
+                        <p class="flex items-center"><i class="fas fa-map-marker-alt w-6 text-accent"></i> <span data-i18n="address_val">CAT TIME PET SHOP</span></p>
+                        <p class="flex items-center"><i class="far fa-clock w-6 text-accent"></i> <span data-i18n="hours_val">Mon-Sun 9:00 AM - 12:00 AM</span></p>
+                        <p class="flex items-center"><i class="fas fa-phone w-6 text-accent"></i> +63 9542255556</p>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-4">
+                        <a href="https://www.facebook.com/profile.php?id=61572691104428" target="_blank" class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"><i class="fab fa-facebook-square mr-2"></i> @cattime2025</a>
+                        <a href="https://www.tiktok.com/@cattime2025" target="_blank" class="flex items-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition"><i class="fab fa-tiktok mr-2"></i> @cattime2025</a>
+                        <a href="https://maps.google.com/?q=CAT+TIME+PET+SHOP" target="_blank" class="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"><i class="fas fa-map-marked-alt mr-2"></i> <span data-i18n="btn_map">Google Maps</span></a>
+                    </div>
+                </div>
+                <div class="hidden md:block md:w-5/12 mt-8 md:mt-0">
+                    <img src="shopinfo2.jpg" alt="Cat Time Pet Shop Entrance" class="rounded-2xl w-full h-80 object-cover shadow-2xl border-4 border-white rotate-2 hover:rotate-0 transition duration-500 cursor-pointer" onclick="openLightbox(this.src)">
+                </div>
+            </div>
+        </section>
+
+        <!-- 1. Grooming Section -->
+        <section id="grooming_section" class="bg-white p-8 rounded-2xl card-shadow">
+            <div class="text-center mb-10">
+                <h2 class="text-4xl font-bold text-gray-800 section-separator" data-i18n="section_grooming_title">1. Cat Grooming Service</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <!-- Info Side -->
+                <div>
+                    <p class="text-lg text-gray-600 mb-6">
+                        <span class="text-3xl mr-2">🛁</span> <span data-i18n="grooming_intro">Pamper your beloved cat with our professional spa services. Available <strong>Tuesday to Sunday, 9:00 AM - 5:00 PM</strong>.</span>
+                    </p>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                        <div class="p-4 border border-sky-100 bg-sky-50 rounded-xl text-center hover:shadow-md transition">
+                            <h4 class="font-bold text-gray-700" data-i18n="pkg_basic">Basic</h4>
+                            <p class="text-2xl font-black text-accent my-1">899 P</p>
+                            <p class="text-xs text-gray-500" data-i18n="pkg_basic_desc">Cleaning, Trimming, Nails</p>
+                        </div>
+                        <div class="p-4 border-2 border-sky-400 bg-white rounded-xl text-center shadow-lg transform scale-105 relative">
+                            <span class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-sky-500 text-white text-xs px-2 py-1 rounded-full" data-i18n="label_recommended">Recommended</span>
+                            <h4 class="font-bold text-gray-800" data-i18n="pkg_deluxe">Deluxe</h4>
+                            <p class="text-2xl font-black text-accent my-1">1599 P</p>
+                            <p class="text-xs text-gray-500" data-i18n="pkg_deluxe_desc">Deep coat care, Styling, Ear care</p>
+                        </div>
+                        <div class="p-4 border border-sky-100 bg-sky-50 rounded-xl text-center hover:shadow-md transition">
+                            <h4 class="font-bold text-gray-700" data-i18n="pkg_premium">Premium</h4>
+                            <p class="text-2xl font-black text-accent my-1">2299 P</p>
+                            <p class="text-xs text-gray-500" data-i18n="pkg_premium_desc">SPA, Nutrition, Pick-up service</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <h4 class="text-sm font-bold text-gray-500 mb-2 uppercase tracking-wide">Grooming Gallery (Click to Enlarge)</h4>
+                        <div class="carousel-container">
+
+<div class="carousel-item" onclick="openLightbox(this.querySelector('img').src)">
+                                <img src="grommingmenu2.jpg" alt="Grooming Area">
+                            </div>
+
+<div class="carousel-item" onclick="openLightbox(this.querySelector('img').src)">
+                                <img src="grommingmenu.jpg" alt="Grooming Area">
+                            </div>
+                            <div class="carousel-item" onclick="openLightbox(this.querySelector('img').src)">
+                                <img src="gromming1.jpg" alt="Grooming Area">
+                            </div>
+<div class="carousel-item" onclick="openLightbox(this.querySelector('img').src)">
+                                <img src="gromming5.jpg" alt="Groomed Cat 1">
+                            </div>
+                          <div class="carousel-item" onclick="openLightbox(this.querySelector('img').src)">
+                                <img src="gromming3.jpg" alt="Cat Bathing">
+                            </div>
+                         <div class="carousel-item" onclick="openLightbox(this.querySelector('img').src)">
+                                <img src="gromming2.jpg" alt="Maine Coon Grooming">
+                            </div>
+                          <div class="carousel-item" onclick="openLightbox(this.querySelector('img').src)">
+                                <img src="gromming4.jpg" alt="Fluffy Cat Groomed">
+                            </div>
+
+
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Booking Form Side -->
+                <div class="bg-gray-50 p-6 rounded-xl border border-gray-100">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center" data-i18n="form_grooming_title">Book Grooming Appointment</h3>
+                    <form id="grooming-form" class="space-y-5">
+                        <p id="grooming-auth-status" class="text-sm text-gray-500 text-center h-5"></p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1" data-i18n="label_name">Your Name</label>
+                                <input type="text" id="grooming-name" required class="w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 p-2.5">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1" data-i18n="label_phone">Phone Number</label>
+                                <input type="tel" id="grooming-phone" required pattern="[0-9]{11}" placeholder="+63 9542255556" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 p-2.5">
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1" data-i18n="label_date">Preferred Date</label>
+                                <input type="date" id="grooming-date" required class="w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 p-2.5">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1"><span data-i18n="label_time">Preferred Time</span></label>
+                                <input type="time" id="grooming-time" min="09:00" max="16:00" required class="w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 p-2.5">
+                                <p class="text-xs text-gray-500 mt-1" data-i18n="hint_grooming_time">9:00 AM - 4:00 PM</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1" data-i18n="label_package">Select Package</label>
+                            <select id="grooming-package" required class="w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 p-2.5">
+                                <option value="" data-i18n="option_choose">-- Choose Package --</option>
+                                <option value="Basic Package (899 P)">Basic Package (899 P)</option>
+                                <option value="Deluxe Package (1599 P)">Deluxe Package (1599 P)</option>
+                                <option value="Premium Package (2299 P)">Premium Package (2299 P)</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="w-full btn-primary font-bold py-3 px-4 rounded-xl shadow-lg mt-4" data-i18n="btn_confirm_booking">Confirm Booking</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Boarding Section -->
+        <section id="boarding_section" class="bg-white p-8 rounded-2xl card-shadow">
+            <div class="text-center mb-10">
+                <h2 class="text-4xl font-bold text-gray-800 section-separator" data-i18n="section_boarding_title">2. Cat Boarding Service</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <!-- Info Side -->
+                <div class="order-2 lg:order-1">
+                     <div class="bg-cream-50 p-6 rounded-xl border border-cream-200 mb-6">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4" data-i18n="pricing_options">Pricing Options</h3>
+                        <div class="flex flex-col space-y-3">
+                            <div class="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm">
+                                <span class="font-medium text-gray-700" data-i18n="price_short">Short Stay (< 10 hours)</span>
+                                <span class="font-bold text-accent text-xl">50 P / <span data-i18n="unit_hour">hour</span></span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm border-l-4 border-accent">
+                                <span class="font-medium text-gray-700" data-i18n="price_overnight">Day Care / Overnight (≥ 10 hours)</span>
+                                <span class="font-bold text-accent text-xl">599 P / <span data-i18n="unit_day">day</span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="font-bold text-gray-800 mb-2" data-i18n="included_title">Everything Included:</h4>
+                    <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-gray-600 mb-6">
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> <span data-i18n="inc_food">Unlimited Cat Food</span></li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> <span data-i18n="inc_litter">Free Litter & Cleaning</span></li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> <span data-i18n="inc_staff">Staff Supervision</span></li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> <span data-i18n="inc_space">Cozy Independent Space</span></li>
+                    </ul>
+                    
+                    <div class="mt-6">
+                        <h4 class="text-sm font-bold text-gray-500 mb-2 uppercase tracking-wide">Boarding Suites (Click to Enlarge)</h4>
+                        <div class="carousel-container">
+                            <div class="carousel-item" onclick="openLightbox(this.querySelector('img').src)">
+                                <img src="boarding1.jpg" alt="Boarding Suite 1">
+                            </div>
+                            <div class="carousel-item" onclick="openLightbox(this.querySelector('img').src)">
+                                <img src="boarding2.jpg" alt="Boarding Suite 2">
+                            </div>
+ <div class="carousel-item" onclick="openLightbox(this.querySelector('img').src)">
+                                <img src="shop1.jpg" alt="Boarding Suite 2">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Booking Form Side -->
+                <div class="order-1 lg:order-2 bg-gray-50 p-6 rounded-xl border border-gray-100">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center" data-i18n="form_boarding_title">Book Boarding</h3>
+                    <form id="boarding-form" class="space-y-5">
+                        <p id="boarding-auth-status" class="text-sm text-gray-500 text-center h-5"></p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1" data-i18n="label_name">Your Name</label>
+                                <input type="text" id="boarding-name" required class="w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 p-2.5">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1" data-i18n="label_phone">Phone Number</label>
+                                <input type="tel" id="boarding-phone" required pattern="[0-9]{11}" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 p-2.5">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1"><span data-i18n="label_time">Check-in Time</span></label>
+                            <input type="time" id="boarding-time" min="09:00" max="23:59" required class="w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 p-2.5">
+                            <p class="text-xs text-gray-500 mt-1" data-i18n="hint_boarding_time">9:00 AM - 12:00 AM</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="label_booking_type">Booking Type</label>
+                            <div class="flex space-x-4">
+                                <label class="flex items-center space-x-2 cursor-pointer bg-white px-4 py-2 rounded-lg border shadow-sm w-full justify-center">
+                                    <input type="radio" name="boardingType" value="daily" checked onchange="toggleBoardingType('daily')" class="text-sky-500 focus:ring-sky-500">
+                                    <span data-i18n="type_daily">Daily (Overnight)</span>
+                                </label>
+                                <label class="flex items-center space-x-2 cursor-pointer bg-white px-4 py-2 rounded-lg border shadow-sm w-full justify-center">
+                                    <input type="radio" name="boardingType" value="hourly" onchange="toggleBoardingType('hourly')" class="text-sky-500 focus:ring-sky-500">
+                                    <span data-i18n="type_hourly">Hourly (Short)</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="daily-inputs">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1" data-i18n="label_start_date">Start Date</label>
+                                    <input type="date" id="boarding-start-date" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 p-2.5">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1" data-i18n="label_days">Number of Days</label>
+                                    <input type="number" id="boarding-days" min="1" value="1" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 p-2.5">
+                                </div>
+                            </div>
+                            <p class="text-sm text-gray-500 mt-2 text-right"><span data-i18n="est_cost">Est. Cost</span>: <span id="daily-cost" class="font-bold text-accent">599 P</span></p>
+                        </div>
+
+                        <div id="hourly-inputs" class="hidden">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1" data-i18n="label_date">Date</label>
+                                    <input type="date" id="boarding-hourly-date" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 p-2.5">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1" data-i18n="label_hours">Hours</label>
+                                    <input type="number" id="boarding-hours" min="1" max="24" value="1" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 p-2.5">
+                                </div>
+                            </div>
+                            <p class="text-sm text-gray-500 mt-2" data-i18n="hourly_note">Note: ≥ 10 hours capped at 599 P.</p>
+                            <p class="text-sm text-gray-500 text-right"><span data-i18n="est_cost">Est. Cost</span>: <span id="hourly-cost" class="font-bold text-accent">50 P</span></p>
+                        </div>
+
+                        <button type="submit" class="w-full btn-primary font-bold py-3 px-4 rounded-xl shadow-lg" data-i18n="btn_submit_boarding">Submit Boarding Booking</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Products Section -->
+        <section id="products_section" class="accent-bg-soft p-8 rounded-2xl card-shadow">
+            <h2 class="text-4xl font-bold text-center text-gray-800 mb-10 section-separator" data-i18n="section_products_title">3. Imported Cat Supplies</h2>
+            <div class="bg-white p-8 rounded-xl shadow-md text-center mb-8">
+                 <h3 class="text-3xl font-bold text-accent-dark mb-4">
+                    <i class="fas fa-globe-americas mr-2"></i> <span data-i18n="products_highlight">High Quality & Affordable</span>
+                </h3>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto" data-i18n="products_intro">
+                    We believe in providing the best for your cats without breaking the bank. Our products are carefully selected from overseas for their <strong>premium quality</strong> at <strong>reasonable prices</strong>.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-sky-100 p-3 rounded-full mr-4"><i class="fas fa-drumstick-bite text-2xl text-accent"></i></div>
+                        <h4 class="text-xl font-bold text-gray-800" data-i18n="cat_food">Food & Nutrition</h4>
+                    </div>
+                    <ul class="text-gray-600 space-y-2 ml-4 list-disc">
+                        <li data-i18n="item_dry_food">Premium dry food brands</li>
+                        <li data-i18n="item_wet_food">Wet food cans & nutritious treat cans</li>
+                        <li data-i18n="item_snacks">Tasty cat sticks & supplements</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-sky-100 p-3 rounded-full mr-4"><i class="fas fa-mouse text-2xl text-accent"></i></div>
+                        <h4 class="text-xl font-bold text-gray-800" data-i18n="cat_toys">Toys & Essentials</h4>
+                    </div>
+                    <ul class="text-gray-600 space-y-2 ml-4 list-disc">
+                        <li data-i18n="item_toys">Interactive puzzles & teasers</li>
+                        <li data-i18n="item_litter">High-absorbency cat litter</li>
+                        <li data-i18n="item_cleaning">Cleaning & hygiene supplies</li>
+                    </ul>
+                </div>
+            </div>
+
+<!-- Interactive Carousel for PRODUCTS -->
+                    <div class="mt-4">
+                         <div class="carousel-container">
+                           <div class="carousel-item" onclick="openLightbox(this.querySelector('img').src)">
+                                <img src="P2.jpg" alt="Frappe & Soda">
+                            </div>
+                          <div class="carousel-item" onclick="openLightbox(this.querySelector('img').src)">
+                                <img src="P3.jpg" alt="Coffee Menu">
+                            </div>
+                           <div class="carousel-item" onclick="openLightbox(this.querySelector('img').src)">
+                                <img src="P4.jpg" alt="More Drinks">
+                            </div>
+<div class="carousel-item" onclick="openLightbox(this.querySelector('img').src)">
+                                <img src="P5.jpg" alt="More Drinks">
+                            </div>
+<div class="carousel-item" onclick="openLightbox(this.querySelector('img').src)">
+                                <img src="P6.jpg" alt="More Drinks">
+                            </div>
+<div class="carousel-item" onclick="openLightbox(this.querySelector('img').src)">
+                                <img src="P7.jpg" alt="More Drinks">
+                            </div>
+<div class="carousel-item" onclick="openLightbox(this.querySelector('img').src)">
+                                <img src="P8.jpg" alt="More Drinks">
+                            </div>
+<div class="carousel-item" onclick="openLightbox(this.querySelector('img').src)">
+                                <img src="P9.jpg" alt="More Drinks">
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+        </section>
+
+        <!-- 4 & 5 Split Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- 4. Drinks -->
+            <section id="drinks_section" class="bg-white p-8 rounded-2xl card-shadow flex flex-col justify-between">
+                <div>
+                    <h2 class="text-3xl font-bold text-center text-gray-800 mb-8 section-separator" data-i18n="section_drinks_title">4. Coffee & Drinks</h2>
+                    <p class="text-gray-600 mb-6 text-center" data-i18n="drinks_intro">Relax with a refreshing drink while you enjoy the company of our cats.</p>
+                    <ul class="space-y-3 mb-6">
+                        <li class="flex items-center bg-sky-50 p-3 rounded-lg"><i class="fas fa-coffee text-brown-600 mr-3 w-6"></i> <span data-i18n="drink_coffee">Freshly Ground Coffee</span></li>
+                        <li class="flex items-center bg-sky-50 p-3 rounded-lg"><i class="fas fa-glass-whiskey text-orange-400 mr-3 w-6"></i> <span data-i18n="drink_soda">Refreshing Sodas</span></li>
+                        <li class="flex items-center bg-sky-50 p-3 rounded-lg"><i class="fas fa-ice-cream text-pink-400 mr-3 w-6"></i> <span data-i18n="drink_frappe">Signature Frappes</span></li>
+                    </ul>
+                    
+                    <div class="mt-4">
+                         <h4 class="text-sm font-bold text-gray-500 mb-2 uppercase tracking-wide">Drink Menu (Click to Enlarge)</h4>
+                         <div class="carousel-container">
+                            <div class="carousel-item" onclick="openLightbox(this.querySelector('img').src)">
+                                <img src="drink1.jpg" alt="Frappe & Soda">
+                            </div>
+                            <div class="carousel-item" onclick="openLightbox(this.querySelector('img').src)">
+                                <img src="drink2.jpg" alt="Coffee Menu">
+                            </div>
+                            <div class="carousel-item" onclick="openLightbox(this.querySelector('img').src)">
+                                <img src="drink3.jpg" alt="More Drinks">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. Cat Sales -->
+            <section id="live_sales_section" class="bg-white p-8 rounded-2xl card-shadow flex flex-col justify-between">
+                <div>
+                    <h2 class="text-3xl font-bold text-center text-gray-800 mb-8 section-separator" data-i18n="section_sales_title">5. Cat Rehoming</h2>
+                    <p class="text-gray-600 mb-6 text-center" data-i18n="sales_intro">Find your purr-fect companion. We breed healthy, happy kittens.</p>
+                    
+                    <div class="flex justify-center gap-4 mb-6">
+                        <span class="px-3 py-1 bg-gray-100 rounded-full text-sm font-semibold text-gray-700" data-i18n="breed_bsh">British Shorthair</span>
+                        <span class="px-3 py-1 bg-gray-100 rounded-full text-sm font-semibold text-gray-700" data-i18n="breed_ragdoll">Ragdoll</span>
+<span class="px-3 py-1 bg-gray-100 rounded-full text-sm font-semibold text-gray-700" data-i18n="breed_munchking">Munchking</span>
+<span class="px-3 py-1 bg-gray-100 rounded-full text-sm font-semibold text-gray-700" data-i18n="breed_Ragamuffing">Ragamuffing</span>
+<span class="px-3 py-1 bg-gray-100 rounded-full text-sm font-semibold text-gray-700" data-i18n="breed_American short hair">American Shorthair</span>
+
+
+                    </div>
+                    
+                    <div class="bg-red-50 border border-red-100 p-4 rounded-xl text-center mb-6">
+                        <p class="text-red-500 font-bold text-lg"><i class="fas fa-heart mr-2"></i> <span data-i18n="sales_promise">Lifetime After-Sales Service</span></p>
+                        <p class="text-xs text-red-400 mt-1" data-i18n="sales_promise_sub">We are committed to the lifelong happiness of our cats.</p>
+                    </div>
+                </div>
+                
+                <div class="carousel-container mt-4">
+                    <div class="carousel-item" onclick="openLightbox(this.querySelector('img').src)">
+                         <img src="rehoming1.jpg" alt="Frappe & Soda">
+                            </div>
+                       <div class="carousel-item" onclick="openLightbox(this.querySelector('img').src)">
+                                <img src="rehoming2.jpg" alt="Coffee Menu">
+                            </div>
+                          <div class="carousel-item" onclick="openLightbox(this.querySelector('img').src)">
+                                <img src="rehoming3.jpg" alt="More Drinks">
+                            </div>
+                        <div class="carousel-item" onclick="openLightbox(this.querySelector('img').src)">
+                                <img src="rehoming4.jpg" alt="Coffee Bar">
+                            </div>
+ <div class="carousel-item" onclick="openLightbox(this.querySelector('img').src)">
+                                <img src="rehoming5.jpg" alt="123">
+                            </div>
+ <div class="carousel-item" onclick="openLightbox(this.querySelector('img').src)">
+                                <img src="rehoming6.jpg" alt="Coffee Bar">
+                            </div>
+ <div class="carousel-item" onclick="openLightbox(this.querySelector('img').src)">
+                                <img src="rehoming7.jpg" alt="Coffee Bar">
+                            </div>
+ <div class="carousel-item" onclick="openLightbox(this.querySelector('img').src)">
+                                <img src="rehoming8.jpg" alt="Coffee Bar">
+                            </div>
+ <div class="carousel-item" onclick="openLightbox(this.querySelector('img').src)">
+                                <img src="rehoming9.jpg" alt="Coffee Bar">
+                            </div>
+ <div class="carousel-item" onclick="openLightbox(this.querySelector('img').src)">
+                                <img src="rehoming10.jpg" alt="Coffee Bar">
+                            </div>
+ <div class="carousel-item" onclick="openLightbox(this.querySelector('img').src)">
+                                <img src="rehoming11.jpg" alt="Coffee Bar">
+                            </div>
+  <div class="carousel-item" onclick="openLightbox(this.querySelector('img').src)">
+                                <img src="rehoming12.jpg" alt="Coffee Bar">
+                            </div>
+  <div class="carousel-item" onclick="openLightbox(this.querySelector('img').src)">
+                                <img src="rehoming13.jpg" alt="Coffee Bar">
+                            </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Shop Environment -->
+        <section id="shop_environment_section" class="bg-white p-8 rounded-2xl card-shadow">
+             <div class="text-center mb-8">
+                <h2 class="text-4xl font-bold text-gray-800 section-separator" data-i18n="section_shop_title">6. Shop Environment</h2>
+                <p class="text-gray-600 mt-4 text-lg" data-i18n="shop_env_intro">Explore our clean, spacious, and cat-friendly environment designed for maximum comfort and happiness.</p>
+            </div>
+            
+            <div class="gallery-container mb-12">
+                <div class="gallery-item" onclick="openLightbox(this.querySelector('img').src)"><img src="shopinfo1.jpg" alt="Shop Interior View 1"></div>
+                <div class="gallery-item" onclick="openLightbox(this.querySelector('img').src)"><img src="shop2.jpg" alt="Shop Interior View 2"></div>
+                <div class="gallery-item" onclick="openLightbox(this.querySelector('img').src)"><img src="shop3.jpg" alt="Shop Interior View 3"></div>
+ <div class="gallery-item" onclick="openLightbox(this.querySelector('img').src)"><img src="shop4.jpg" alt="Shop Interior View 3"></div>
+ <div class="gallery-item" onclick="openLightbox(this.querySelector('img').src)"><img src="shop5.jpg" alt="Shop Interior View 3"></div>
+            </div>
+
+            <!-- Live Records -->
+            <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                    <span class="w-3 h-3 bg-green-500 rounded-full mr-2 animate-pulse"></span> <span data-i18n="latest_bookings">Latest Bookings (Live)</span>
+                </h3>
+                <div id="loading-indicator" class="text-center text-gray-500 py-4 hidden">
+                    <i class="fas fa-spinner fa-spin mr-2"></i> Connecting to data service...
+                </div>
+                <div id="bookings-list" class="space-y-3">
+                    <!-- JS will populate this -->
+                </div>
+            </div>
+             <!-- Message Box -->
+            <div id="message-box" class="fixed bottom-5 right-5 max-w-sm p-4 rounded-lg shadow-xl hidden z-50 text-white font-bold transition-all transform translate-y-full"></div>
+        </section>
+    </main>
+
+    <footer class="header-bg mt-12 py-10 border-t border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <h2 class="text-2xl font-extrabold text-gray-800 mb-2">CatのTime</h2>
+            <p class="text-gray-500 mb-6" data-i18n="address_val">CAT TIME PET SHOP, Angeles, Philippines</p>
+            
+            <div class="flex justify-center space-x-6 mb-8">
+                <a href="https://www.facebook.com/profile.php?id=61572691104428" target="_blank" class="text-gray-400 hover:text-blue-600 text-2xl transition"><i class="fab fa-facebook"></i></a>
+                <a href="https://www.tiktok.com/@cattime2025" target="_blank" class="text-gray-400 hover:text-black text-2xl transition"><i class="fab fa-tiktok"></i></a>
+                <a href="tel:+63 9542255556" class="text-gray-400 hover:text-green-600 text-2xl transition"><i class="fas fa-phone"></i></a>
+            </div>
+            <p class="text-sm text-gray-400">&copy; 2025 CatのTime. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, addDoc, onSnapshot, collection, query, serverTimestamp, setLogLevel, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Config & Globals
+        let app, db, auth, userId = '';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        const BOOKINGS_COLLECTION = `artifacts/${appId}/public/data/bookings`;
+
+        // DOM Elements
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const messageBox = document.getElementById('message-box');
+        const bookingsListEl = document.getElementById('bookings-list');
+
+        // Translation Data
+        const translations = {
+            en: {
+                nav_home: "Home",
+                nav_grooming: "Grooming",
+                nav_boarding: "Boarding",
+                nav_products: "Products",
+                nav_sales: "Cat Sales",
+                nav_shop: "Shop Env.",
+                hero_welcome: "Welcome to our Cat Cafe!",
+                hero_tagline: "Your Purr-fect Haven",
+                hero_free_entry_title: "Free Entry!",
+                hero_free_entry_desc: "No Admission Fee Required. Come visit us and play with cats anytime!",
+                address_val: "CAT TIME,Friendship Hwy,Angeles,Pampanga",
+                hours_val: "Mon-Sun 9:00 AM - 12:00 AM",
+                btn_map: "Google Maps",
+                section_grooming_title: "1. Cat Grooming Service",
+                grooming_intro: "Pamper your beloved cat with our professional spa services. Available <strong>Tuesday to Sunday, 9:00 AM - 4:00 PM</strong>.",
+                pkg_basic: "Basic",
+                pkg_basic_desc: "Cleaning, Trimming, Nails",
+                label_recommended: "Recommended",
+                pkg_deluxe: "Deluxe",
+                pkg_deluxe_desc: "Deep coat care, Styling, Ear care",
+                pkg_premium: "Premium",
+                pkg_premium_desc: "SPA, Nutrition, Pick-up service",
+                form_grooming_title: "Book Grooming Appointment",
+                label_name: "Your Name",
+                label_phone: "Phone Number",
+                label_date: "Preferred Date",
+                label_time: "Preferred Time",
+                hint_grooming_time: "9:00 AM - 4:00 PM",
+                label_package: "Select Package",
+                option_choose: "-- Choose Package --",
+                btn_confirm_booking: "Confirm Booking",
+                section_boarding_title: "2. Cat Boarding Service",
+                pricing_options: "Pricing Options",
+                price_short: "Short Stay (< 10 hours)",
+                price_overnight: "Day Care / Overnight (≥ 10 hours)",
+                unit_hour: "hour",
+                unit_day: "day",
+                included_title: "Everything Included:",
+                inc_food: "Unlimited Cat Food",
+                inc_litter: "Free Litter & Cleaning",
+                inc_staff: "Staff Supervision",
+                inc_space: "Cozy Independent Space",
+                form_boarding_title: "Book Boarding",
+                label_booking_type: "Booking Type",
+                type_daily: "Daily (Overnight)",
+                type_hourly: "Hourly (Short)",
+                label_start_date: "Start Date",
+                label_days: "Number of Days",
+                label_hours: "Hours",
+                est_cost: "Est. Cost",
+                hourly_note: "Note: ≥ 10 hours capped at 599 P.",
+                btn_submit_boarding: "Submit Boarding Booking",
+                hint_boarding_time: "9:00 AM - 12:00 AM",
+                section_products_title: "3. Overseas Imported Cat Supplies",
+                products_highlight: "High Quality & Affordable",
+                products_intro: "We believe in providing the best for your cats without breaking the bank. Our products are carefully selected from overseas for their <strong>premium quality</strong> at <strong>reasonable prices</strong>.",
+                cat_food: "Food & Nutrition",
+                item_dry_food: "Premium dry food brands",
+                item_wet_food: "Wet food cans & nutritious treat cans",
+                item_snacks: "Tasty cat sticks & supplements",
+                cat_toys: "Toys & Essentials",
+                item_toys: "Interactive puzzles & teasers",
+                item_litter: "High-absorbency cat litter",
+                item_cleaning: "Cleaning & hygiene supplies",
+                section_drinks_title: "4. Coffee & Drinks",
+                drinks_intro: "Relax with a refreshing drink while you enjoy the company of our cats.",
+                drink_coffee: "Freshly Ground Coffee",
+                drink_soda: "Refreshing Sodas",
+                drink_frappe: "Signature Frappes",
+                section_sales_title: "5. Live Cat Sales",
+                sales_intro: "Find your purr-fect companion. We breed healthy, happy kittens.",
+                breed_bsh: "British Shorthair",
+                breed_ragdoll: "Ragdoll",
+                sales_promise: "Lifetime After-Sales Service",
+                sales_promise_sub: "We are committed to the lifelong happiness of our cats.",
+                section_shop_title: "6. Shop Environment",
+                shop_env_intro: "Explore our clean, spacious, and cat-friendly environment designed for maximum comfort and happiness.",
+                latest_bookings: "Latest Bookings (Live)"
+            },
+            tl: {
+                nav_home: "Home",
+                nav_grooming: "Pag-aayos",
+                nav_boarding: "Tuluyan",
+                nav_products: "Produkto",
+                nav_sales: "Bentahan",
+                nav_shop: "Shop Env.",
+                hero_welcome: "Maligayang pagdating sa aming Cat Cafe!",
+                hero_tagline: "Ang Iyong Purr-fect Haven",
+                hero_free_entry_title: "Libreng Pasok!",
+                hero_free_entry_desc: "Walang bayad sa pagpasok. Bumisita at makipaglaro sa mga pusa anumang oras!",
+                address_val: "CAT TIME,Friendship Hwy,Angeles,Pampanga",
+                hours_val: "Lun-Ling 9:00 NU - 12:00 NH",
+                btn_map: "Google Maps",
+                section_grooming_title: "1. Serbisyo sa Pag-aayos ng Pusa",
+                grooming_intro: "Paligayahin ang iyong pusa sa aming professional spa. Available <strong>Martes hanggang Linggo, 9:00 NU - 4:00 NH</strong>.",
+                pkg_basic: "Basic",
+                pkg_basic_desc: "Linis, Gupit, Kuko",
+                label_recommended: "Inirerekomenda",
+                pkg_deluxe: "Deluxe",
+                pkg_deluxe_desc: "Malalim na pag-aalaga sa balahibo, Styling, Tenga",
+                pkg_premium: "Premium",
+                pkg_premium_desc: "SPA, Nutrisyon, Hatid-Sundo",
+                form_grooming_title: "Mag-book ng Pag-aayos",
+                label_name: "Iyong Pangalan",
+                label_phone: "Numero ng Telepono",
+                label_date: "Petsa",
+                label_time: "Oras",
+                hint_grooming_time: "9:00 NU - 4:00 NH",
+                label_package: "Pumili ng Package",
+                option_choose: "-- Pumili ng Package --",
+                btn_confirm_booking: "Kumpirmahin ang Booking",
+                section_boarding_title: "2. Serbisyo sa Tuluyan ng Pusa",
+                pricing_options: "Mga Pagpipilian sa Presyo",
+                price_short: "Maikling Pananatili (< 10 oras)",
+                price_overnight: "Day Care / Overnight (≥ 10 oras)",
+                unit_hour: "oras",
+                unit_day: "araw",
+                included_title: "Kasama ang Lahat:",
+                inc_food: "Walang limitasyong Pagkain",
+                inc_litter: "Libreng Litter at Linis",
+                inc_staff: "Bantay ng Staff",
+                inc_space: "Komportableng Sariling Espasyo",
+                form_boarding_title: "Mag-book ng Tuluyan",
+                label_booking_type: "Uri ng Booking",
+                type_daily: "Arawan (Overnight)",
+                type_hourly: "Orasan (Maikli)",
+                label_start_date: "Petsa ng Simula",
+                label_days: "Bilang ng Araw",
+                label_hours: "Oras",
+                est_cost: "Tinatayang Gastos",
+                hourly_note: "Paalala: ≥ 10 oras ay 599 P na.",
+                btn_submit_boarding: "I-submit ang Booking",
+                hint_boarding_time: "9:00 NU - 12:00 NH",
+                section_products_title: "3. Imported na Gamit ng Pusa",
+                products_highlight: "Mataas na Kalidad at Abot-kaya",
+                products_intro: "Naniniwala kami sa pagbibigay ng pinakamahusay para sa iyong pusa. Ang aming mga produkto ay <strong>premium quality</strong> sa <strong>presyong abot-kaya</strong>.",
+                cat_food: "Pagkain at Nutrisyon",
+                item_dry_food: "Premium na dry food brands",
+                item_wet_food: "Wet food cans at treats",
+                item_snacks: "Masasarap na cat sticks",
+                cat_toys: "Laruan at Iba pa",
+                item_toys: "Interactive puzzles at laruan",
+                item_litter: "High-absorbency cat litter",
+                item_cleaning: "Gamit panlinis",
+                section_drinks_title: "4. Kape at Inumin",
+                drinks_intro: "Mag-relax kasama ang masasarap na inumin habang kasama ang mga pusa.",
+                drink_coffee: "Bagong Giling na Kape",
+                drink_soda: "Nire-refresh na Soda",
+                drink_frappe: "Signature Frappes",
+                section_sales_title: "5. Bentahan ng Pusa",
+                sales_intro: "Hanapin ang iyong bagong kasama. Malulusog at masaya ang aming mga kuting.",
+                breed_bsh: "British Shorthair",
+                breed_ragdoll: "Ragdoll",
+                sales_promise: "Lifetime After-Sales Service",
+                sales_promise_sub: "Kami ay nakatuon sa panghabambuhay na kaligayahan ng aming mga pusa.",
+                section_shop_title: "6. Shop Environment", 
+                shop_env_intro: "Galugarin ang aming malinis, maluwag, at cat-friendly na kapaligiran na idinisenyo para sa maximum na ginhawa at kaligayahan.", 
+                latest_bookings: "Pinakabagong Booking (Live)"
+            },
+            ko: {
+                nav_home: "홈",
+                nav_grooming: "미용",
+                nav_boarding: "호텔링",
+                nav_products: "용품",
+                nav_sales: "고양이 분양",
+                nav_shop: "매장 환경",
+                hero_welcome: "고양이 카페에 오신 것을 환영합니다!",
+                hero_tagline: "고양이와 함께하는 완벽한 휴식처",
+                hero_free_entry_title: "무료 입장!",
+                hero_free_entry_desc: "입장료가 없습니다. 언제든 방문해서 고양이들과 놀아주세요!",
+                address_val: "앙헬레스 코리아타운",
+                hours_val: "월-일 오전 9:00 - 밤 12:00",
+                btn_map: "구글 지도",
+                section_grooming_title: "1. 고양이 미용 서비스",
+                grooming_intro: "전문 스파 서비스로 고양이에게 힐링을 선물하세요. <strong>화요일~일요일, 오전 9시 - 오후 4시</strong> 이용 가능.",
+                pkg_basic: "베이직",
+                pkg_basic_desc: "목욕, 기본 미용, 발톱 정리",
+                label_recommended: "추천",
+                pkg_deluxe: "디럭스",
+                pkg_deluxe_desc: "딥 코트 케어, 스타일링, 귀 청소",
+                pkg_premium: "프리미엄",
+                pkg_premium_desc: "스파, 영양 관리, 픽업 서비스",
+                form_grooming_title: "미용 예약하기",
+                label_name: "성함",
+                label_phone: "전화번호",
+                label_date: "예약 날짜",
+                label_time: "예약 시간",
+                hint_grooming_time: "09:00 - 16:00",
+                label_package: "패키지 선택",
+                option_choose: "-- 패키지 선택 --",
+                btn_confirm_booking: "예약 확정",
+                section_boarding_title: "2. 고양이 호텔링 서비스",
+                pricing_options: "요금 옵션",
+                price_short: "단기 위탁 (10시간 미만)",
+                price_overnight: "데이케어 / 숙박 (10시간 이상)",
+                unit_hour: "시간",
+                unit_day: "일",
+                included_title: "포함 내역:",
+                inc_food: "사료 무제한 제공",
+                inc_litter: "모래 제공 및 청소",
+                inc_staff: "직원 케어",
+                inc_space: "아늑한 독립 공간",
+                form_boarding_title: "호텔링 예약",
+                label_booking_type: "예약 유형",
+                type_daily: "숙박 (1일 단위)",
+                type_hourly: "시간제 (단기)",
+                label_start_date: "시작 날짜",
+                label_days: "이용 일수",
+                label_hours: "이용 시간",
+                est_cost: "예상 비용",
+                hourly_note: "참고: 10시간 이상은 599페소 고정.",
+                btn_submit_boarding: "호텔링 예약 제출",
+                hint_boarding_time: "09:00 - 24:00",
+                section_products_title: "3. 해외 수입 고양이 용품",
+                products_highlight: "고품질 & 합리적인 가격",
+                products_intro: "우리는 최고의 제품을 합리적인 가격에 제공합니다. 해외에서 엄선된 <strong>프리미엄 품질</strong>의 용품을 만나보세요.",
+                cat_food: "사료 및 영양",
+                item_dry_food: "프리미엄 건식 사료",
+                item_wet_food: "습식 캔 및 영양 간식",
+                item_snacks: "맛있는 고양이 스틱",
+                cat_toys: "장난감 및 필수품",
+                item_toys: "인터랙티브 장난감",
+                item_litter: "고흡수성 모래",
+                item_cleaning: "청소 및 위생 용품",
+                section_drinks_title: "4. 커피 및 음료",
+                drinks_intro: "고양이들과 함께 시원한 음료를 즐기며 휴식을 취하세요.",
+                drink_coffee: "갓 내린 커피",
+                drink_soda: "상쾌한 소다",
+                drink_frappe: "시그니처 프라페",
+                section_sales_title: "5. 고양이 분양",
+                sales_intro: "새로운 가족을 맞이하세요. 건강하고 행복한 아기 고양이들이 기다리고 있습니다.",
+                breed_bsh: "브리티시 숏헤어",
+                breed_ragdoll: "렉돌",
+                sales_promise: "평생 사후 관리 서비스",
+                sales_promise_sub: "우리는 고양이의 평생 행복을 약속합니다.",
+                section_shop_title: "6. 매장 환경",
+                shop_env_intro: "최대한의 편안함과 행복을 위해 설계된 깨끗하고 넓으며 고양이 친화적인 환경을 살펴보세요.",
+                latest_bookings: "최근 예약 현황 (실시간)"
+            },
+            zh: {
+                nav_home: "首页",
+                nav_grooming: "洗护",
+                nav_boarding: "寄养",
+                nav_products: "用品",
+                nav_sales: "活体销售",
+                nav_shop: "店铺环境",
+                hero_welcome: "欢迎来到我们的猫咖！",
+                hero_tagline: "享受完美的喵咪时光",
+                hero_free_entry_title: "免费入场！",
+                hero_free_entry_desc: "无需门票。欢迎随时光临，与猫咪互动！",
+                address_val: "安吉利斯韩国街",
+                hours_val: "周一至周日 9:00 AM - 12:00 AM",
+                btn_map: "谷歌地图",
+                section_grooming_title: "1. 猫咪洗护服务",
+                grooming_intro: "让您的爱猫享受专业的SPA服务。营业时间：<strong>周二至周日，9:00 AM - 4:00 PM</strong>。",
+                pkg_basic: "基础套餐",
+                pkg_basic_desc: "清洁, 修剪, 剪指甲",
+                label_recommended: "推荐",
+                pkg_deluxe: "豪华套餐",
+                pkg_deluxe_desc: "深度护毛, 造型, 耳朵护理",
+                pkg_premium: "至尊套餐",
+                pkg_premium_desc: "SPA, 营养护理, 接送服务",
+                form_grooming_title: "预约洗护",
+                label_name: "您的姓名",
+                label_phone: "联系电话",
+                label_date: "预约日期",
+                label_time: "预约时间",
+                hint_grooming_time: "9:00 - 16:00",
+                label_package: "选择套餐",
+                option_choose: "-- 请选择套餐 --",
+                btn_confirm_booking: "确认预约",
+                section_boarding_title: "2. 猫咪寄养服务",
+                pricing_options: "价格选项",
+                price_short: "短期寄养 (< 10 小时)",
+                price_overnight: "全天/过夜 (≥ 10 小时)",
+                unit_hour: "小时",
+                unit_day: "天",
+                included_title: "费用包含：",
+                inc_food: "无限量猫粮",
+                inc_litter: "免费猫砂和清理",
+                inc_staff: "专人照看",
+                inc_space: "独立舒适空间",
+                form_boarding_title: "预约寄养",
+                label_booking_type: "预约类型",
+                type_daily: "按天 (过夜)",
+                type_hourly: "按小时 (短期)",
+                label_start_date: "开始日期",
+                label_days: "天数",
+                label_hours: "小时数",
+                est_cost: "预估费用",
+                hourly_note: "注：超过10小时按599P封顶。",
+                btn_submit_boarding: "提交寄养预约",
+                hint_boarding_time: "9:00 - 0:00",
+                section_products_title: "3. 海外进口猫咪用品",
+                products_highlight: "物美价廉",
+                products_intro: "我们致力于为您提供物超所值的猫咪用品。所有产品均由海外精选，<strong>品质上乘</strong>且<strong>价格亲民</strong>。",
+                cat_food: "食品与营养",
+                item_dry_food: "优质干粮品牌",
+                item_wet_food: "主食罐头与营养零食",
+                item_snacks: "美味猫条与补给品",
+                cat_toys: "玩具与日用品",
+                item_toys: "益智玩具与逗猫棒",
+                item_litter: "高吸水性猫砂",
+                item_cleaning: "清洁与卫生用品",
+                section_drinks_title: "4. 咖啡与饮品",
+                drinks_intro: "在与猫咪互动的同时，享受一杯清爽的饮品。",
+                drink_coffee: "现磨咖啡",
+                drink_soda: "清爽苏打水",
+                drink_frappe: "招牌冰沙",
+                section_sales_title: "5. 猫咪活体销售",
+                sales_intro: "寻找您的完美伴侣。我们繁育健康、快乐的小猫。",
+                breed_bsh: "英国短毛猫",
+                breed_ragdoll: "布偶猫",
+                sales_promise: "终身售后服务",
+                sales_promise_sub: "我们承诺对猫咪的终身幸福负责。",
+                section_shop_title: "6. 店铺环境", // Added
+                shop_env_intro: "探索我们干净、宽敞、对猫友好的环境，旨在提供最大的舒适和幸福。", // Added
+                latest_bookings: "最新预定 (实时)"
+            }
+        };
+
+        // Language Switcher Logic
+        window.changeLanguage = (lang) => {
+            const t = translations[lang];
+            if (!t) return;
+
+            // Update text content for elements with data-i18n
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (t[key]) {
+                    if (el.tagName === 'INPUT' && el.getAttribute('placeholder')) {
+                         // For inputs with placeholders (though currently none used in code, good for future)
+                         // We don't have placeholders with i18n in current HTML structure, but just in case
+                    } else {
+                        // Use innerHTML to support <strong> tags in translations
+                        el.innerHTML = t[key];
+                    }
+                }
+            });
+        };
+
+        // --- UI Helpers ---
+        window.toggleBoardingType = (type) => {
+            const dailyInputs = document.getElementById('daily-inputs');
+            const hourlyInputs = document.getElementById('hourly-inputs');
+            const startDateInput = document.getElementById('boarding-start-date');
+            const daysInput = document.getElementById('boarding-days');
+            const dateInput = document.getElementById('boarding-hourly-date');
+            const hoursInput = document.getElementById('boarding-hours');
+
+            if (type === 'daily') {
+                dailyInputs.classList.remove('hidden');
+                hourlyInputs.classList.add('hidden');
+                // Update required attributes
+                startDateInput.required = true;
+                daysInput.required = true;
+                dateInput.required = false;
+                hoursInput.required = false;
+            } else {
+                dailyInputs.classList.add('hidden');
+                hourlyInputs.classList.remove('hidden');
+                startDateInput.required = false;
+                daysInput.required = false;
+                dateInput.required = true;
+                hoursInput.required = true;
+            }
+        };
+
+        // Price Calculators for UI feedback
+        document.getElementById('boarding-days')?.addEventListener('input', (e) => {
+            const cost = (parseInt(e.target.value) || 0) * 599;
+            document.getElementById('daily-cost').innerText = `${cost} P`;
+        });
+
+        document.getElementById('boarding-hours')?.addEventListener('input', (e) => {
+            const hours = parseInt(e.target.value) || 0;
+            let cost = hours * 50;
+            if (hours >= 10) cost = 599; // Cap logic for display
+            document.getElementById('hourly-cost').innerText = `${cost} P`;
+        });
+
+        function showMessage(message, type) {
+            messageBox.classList.remove('hidden', 'translate-y-full', 'bg-red-500', 'bg-green-500');
+            messageBox.textContent = message;
+            messageBox.classList.add(type === 'success' ? 'bg-green-500' : 'bg-red-500', 'translate-y-0');
+            setTimeout(() => {
+                messageBox.classList.add('translate-y-full');
+            }, 5000);
+        }
+
+        // --- Lightbox Logic ---
+        window.openLightbox = (src) => {
+            const lightbox = document.getElementById('lightbox');
+            const img = document.getElementById('lightbox-img');
+            img.src = src;
+            lightbox.classList.add('active');
+        };
+
+        window.closeLightbox = () => {
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.remove('active');
+        };
+
+        // --- Firebase Logic ---
+        async function initializeFirebase() {
+            loadingIndicator.classList.remove('hidden');
+            if (!firebaseConfig) {
+                showMessage("Firebase Config Missing", 'error');
+                return;
+            }
+
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                
+                if (initialAuthToken) await signInWithCustomToken(auth, initialAuthToken);
+                else await signInAnonymously(auth);
+
+                onAuthStateChanged(auth, user => {
+                    if (user) {
+                        userId = user.uid;
+                        console.log("Auth Ready:", userId);
+                    }
+                });
+
+                setupRealtimeBookings();
+                loadingIndicator.classList.add('hidden');
+            } catch (error) {
+                console.error("Init Error:", error);
+                loadingIndicator.classList.add('hidden');
+            }
+        }
+
+        function setupRealtimeBookings() {
+            if (!db) return;
+            // Firestore Query: No complex index needed, just fetch collection
+            const q = query(collection(db, BOOKINGS_COLLECTION)); 
+            
+            onSnapshot(q, (snapshot) => {
+                const bookings = [];
+                snapshot.forEach(doc => bookings.push({id: doc.id, ...doc.data()}));
+                
+                // Sort in memory to avoid index requirement errors
+                bookings.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+                
+                bookingsListEl.innerHTML = '';
+                bookings.slice(0, 5).forEach(booking => {
+                    const dateStr = booking.timestamp ? new Date(booking.timestamp.seconds * 1000).toLocaleDateString() : 'Just now';
+                    let details = '';
+                    
+                    if (booking.type === 'Grooming') {
+                        // Display date and time for grooming
+                        details = `<span class="text-sky-600 bg-sky-50 px-2 py-1 rounded text-xs font-bold uppercase">Grooming</span> ${booking.date} @ ${booking.time || ''}`;
+                    } else if (booking.type === 'Boarding') {
+                        const subType = booking.boardingType === 'hourly' ? 'Hourly' : 'Daily';
+                        const duration = booking.boardingType === 'hourly' ? `${booking.hours} hrs` : `${booking.days} days`;
+                        // Display check-in time for boarding
+                        details = `<span class="text-orange-600 bg-orange-50 px-2 py-1 rounded text-xs font-bold uppercase">Boarding (${subType})</span> ${duration} @ ${booking.time || ''}`;
+                    }
+
+                    const row = document.createElement('div');
+                    row.className = 'flex justify-between items-center p-3 bg-white border border-gray-100 rounded-lg shadow-sm animate-fade-in';
+                    row.innerHTML = `
+                        <div>
+                            <p class="font-bold text-gray-800 text-sm">${booking.name}</p>
+                            <p class="text-xs text-gray-500">${details}</p>
+                        </div>
+                        <span class="text-xs text-gray-400">${dateStr}</span>
+                    `;
+                    bookingsListEl.appendChild(row);
+                });
+                
+                if(bookings.length === 0) {
+                    bookingsListEl.innerHTML = '<p class="text-gray-400 text-sm text-center italic">No recent bookings</p>';
+                }
+            });
+        }
+
+        // --- Form Handlers ---
+        window.handleBooking = async (e, type) => {
+            e.preventDefault();
+            if (!userId) { showMessage("Service connecting...", 'error'); return; }
+
+            const form = e.target;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+            try {
+                let data = {
+                    type: type,
+                    userId: userId,
+                    timestamp: serverTimestamp(),
+                    name: form.querySelector(`#${type.toLowerCase()}-name`).value,
+                    phone: form.querySelector(`#${type.toLowerCase()}-phone`).value,
+                };
+
+                if (type === 'Grooming') {
+                    data.date = form.querySelector('#grooming-date').value;
+                    data.time = form.querySelector('#grooming-time').value; // Add time to data
+                    data.package = form.querySelector('#grooming-package').value;
+                } else {
+                    // Boarding Logic
+                    const mode = document.querySelector('input[name="boardingType"]:checked').value;
+                    data.boardingType = mode;
+                    data.time = form.querySelector('#boarding-time').value; // Add time to data (Check-in time)
+                    
+                    if (mode === 'daily') {
+                        data.startDate = form.querySelector('#boarding-start-date').value;
+                        data.days = parseInt(form.querySelector('#boarding-days').value);
+                        data.totalPrice = data.days * 599;
+                    } else {
+                        data.date = form.querySelector('#boarding-hourly-date').value;
+                        data.hours = parseInt(form.querySelector('#boarding-hours').value);
+                        // Pricing Rule: < 10 hrs = 50/hr, >= 10 hrs = 599 fixed
+                        if (data.hours >= 10) {
+                            data.totalPrice = 599;
+                        } else {
+                            data.totalPrice = data.hours * 50;
+                        }
+                    }
+                }
+
+                await addDoc(collection(db, BOOKINGS_COLLECTION), data);
+                showMessage("Booking Confirmed!", 'success');
+                form.reset();
+                // Reset boarding toggle UI if needed
+                if(type === 'Boarding') toggleBoardingType('daily'); 
+
+            } catch (err) {
+                console.error(err);
+                showMessage("Booking Failed. Try again.", 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = type === 'Grooming' ? 'Confirm Booking' : 'Submit Boarding Booking';
+            }
+        };
+
+        document.getElementById('grooming-form').addEventListener('submit', (e) => window.handleBooking(e, 'Grooming'));
+        document.getElementById('boarding-form').addEventListener('submit', (e) => window.handleBooking(e, 'Boarding'));
+
+        window.onload = initializeFirebase;
+        
+        // Mobile menu
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        });
+    </script>
+</body>
+</html>
